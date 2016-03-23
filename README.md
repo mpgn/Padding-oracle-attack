@@ -97,12 +97,13 @@ etc etc for all the block. You can now launch the python script by reading the n
 
 ## Options
 
-The test file :
+The test file if you don't have target :
 
 ```bash
 python test.py -m mysecretmessage
 ```
 
+The exploit : 
 ```
 usage: exploit.py [-h] -c CIPHER -l LENGTH_BLOCK_CIPHER --host HOST -u
                   URLTARGET --error ERROR [--cookie COOKIE]
