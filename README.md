@@ -138,6 +138,8 @@ python exploit.py -c E3B3D1120F999F4CEF945BA8B9326D7C3C8A8B02178E59AF506666542AB
 
 > I wan to custom the Oracle !
 
+Example with sockets https://gist.github.com/mpgn/fce3c3f2aaa2eeb8fac5
+
 No problem, find these line and do what you have to do :)
 
 * Custom oracle response: 
