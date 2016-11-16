@@ -155,7 +155,7 @@ def run(cipher,size_block):
                         break
             if found == False:
                 # lets say padding is 01 for the last block (the padding block)
-                if len(cipher_block)-1 == block:
+                if len(cipher_block)-1 == block and i == 0:
                     value = re.findall('..',bk)
                     valide_value.insert(0,"01")
                     if args.verbose == True:
