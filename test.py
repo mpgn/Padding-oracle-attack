@@ -106,8 +106,7 @@ def run(cipher,size_block):
             # test each byte max 255
             for ct_pos in range(0,256):
                 # 1 xor 1 = 0 or valide padding need to be checked
-                if ct_pos != i+1 or (len(valide_value) > 0  and int(valide_value[len(valide_value)-1],16) == ct_pos):
-
+                if ct_pos != i+1 or (len(valide_value) > 0  and int(valide_value[-1],16) == ct_pos):
                     bk = block_search_byte(size_block, i, ct_pos, valide_value) 
                     bp = cipher_block[block-1]
                     bc = block_padding(size_block, i) 
@@ -146,14 +145,14 @@ def run(cipher,size_block):
                             print ''
 
                         bytes_found = ''.join(valide_value)
-                        if i == 0 and bytes_found.decode("hex") > hex(size_block):
-                            print "[-] Error decryption failed the padding is > 16"
+                        if i == 0 and bytes_found.decode("hex") > hex(size_block) and block == len(cipher_block)-1:
+                            print "[-] Error decryption failed the padding is > "+str(size_block)
                             sys.exit()
 
                         print '\033[36m' + '\033[1m' + "[+]" + '\033[0m' + " Found", i+1,  "bytes :", bytes_found
                         print ''
 
-                        break 
+                        break
             if found == False:
                 print "\n[-] Error decryption failed"
                 result.insert(0, ''.join(valide_value))
