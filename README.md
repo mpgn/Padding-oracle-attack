@@ -44,11 +44,11 @@ C'<sub>i-1</sub> = C<sub>i-1</sub> ⊕ 00000001 ⊕ 0000000X | C<sub>i</sub>
 
 Where X is a char between `chr(0-256)`. 
 
-* then he sends C'<sub>i-1</sub> | C<sub>i</sub> to the oracle. The oracle will decrypt like this :
+* then he sends C'<sub>i-1</sub> \| C<sub>i</sub> to the oracle. The oracle will decrypt like this :
 
-D<sub>k</sub>(C'<sub>i</sub>) ⊕ C'<sub>i-1</sub>  <br>
-= D<sub>k</sub>(C'<sub>i</sub>) ⊕ C<sub>i-1</sub> ⊕ 00000001 ⊕ 0000000X <br>
-= P'<sub>i</sub> ⊕ 00000001 ⊕ 0000000X <br>
+D<sub>k</sub>(C<sub>i</sub>) ⊕ C'<sub>i-1</sub>  <br>
+= D<sub>k</sub>(C<sub>i</sub>) ⊕ C<sub>i-1</sub> ⊕ 00000001 ⊕ 0000000X <br>
+= P<sub>i</sub> ⊕ 00000001 ⊕ 0000000X <br>
 
 Now there is two possibilities: a padding error or not :
 
@@ -72,13 +72,13 @@ If P'i ⊕ 0000000X == abcdefg0 then:
 **For the second byte :**
 
 
-C'<sub>i-1</sub> = C'<sub>i-1</sub> ⊕ 00000022 ⊕ 000000YX | C<sub>i</sub>
+C'<sub>i-1</sub> = C<sub>i-1</sub> ⊕ 00000022 ⊕ 000000YX \| C<sub>i</sub>
 
 And then : 
 
-D<sub>k</sub>(C'<sub>i</sub>) ⊕ C'<sub>i-1</sub> <br>
-= D<sub>k</sub>(C'<sub>i</sub>) ⊕ C'<sub>i-1</sub> ⊕ 00000022 ⊕ 000000YX <br>
-= P'<sub>i</sub> ⊕ 00000001 ⊕ 00000YX <br>
+D<sub>k</sub>(C<sub>i</sub>) ⊕ C'<sub>i-1</sub> <br>
+= D<sub>k</sub>(C<sub>i</sub>) ⊕ C<sub>i-1</sub> ⊕ 00000022 ⊕ 000000YX <br>
+= P<sub>i</sub> ⊕ 00000001 ⊕ 00000YX <br>
 
 * The oracle didn't give us a padding error and we know the byte X is good :
 
