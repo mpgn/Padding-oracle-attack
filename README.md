@@ -40,11 +40,11 @@ An attacker will intercept a cipher text and retrieve byte by byte the plaintext
 * intercepted cipher : C<sub>0</sub> | C<sub>...</sub> | C<sub>i-1</sub> | C<sub>i</sub>
 * then build a block like this :
 
-C'<sub>i-1</sub> = C'<sub>i-1</sub> ⊕ 00000001 ⊕ 0000000X || C<sub>i</sub>
+C'<sub>i-1</sub> = C'<sub>i-1</sub> ⊕ 00000001 ⊕ 0000000X | C<sub>i</sub>
 
 Where X is a char between `chr(0-256)`. 
 
-* then he sends C'<sub>i-1</sub> || C<sub>i</sub> to the oracle. The oracle will decrypt like this :
+* then he sends C'<sub>i-1</sub> | C<sub>i</sub> to the oracle. The oracle will decrypt like this :
 
 D<sub>k</sub>(C'<sub>i</sub>) ⊕ C'<sub>i-1</sub>  <br>
 = D<sub>k</sub>(C'<sub>i</sub>) ⊕ C'<sub>i-1</sub> ⊕ 00000001 ⊕ 0000000X <br>
@@ -72,7 +72,7 @@ If P'i ⊕ 0000000X == abcdefg0 then:
 **For the second byte :**
 
 
-C'<sub>i-1</sub> = C'<sub>i-1</sub> ⊕ 00000022 ⊕ 000000YX || C<sub>i</sub>
+C'<sub>i-1</sub> = C'<sub>i-1</sub> ⊕ 00000022 ⊕ 000000YX | C<sub>i</sub>
 
 And then : 
 
@@ -120,7 +120,7 @@ Details required options:
     example: with HTTP method: 200,400,500
              with DOM HTML   : "<h2>Padding Error</h2>"
 ```
-Optionnal options:
+Optional options:
 ```bash
 --cookie Cookie parameter example: PHPSESSID=9nnvje7p90b507shfmb94d7
 --method Default GET methode but can se POST etc
@@ -136,7 +136,7 @@ python exploit.py -c E3B3D1120F999F4CEF945BA8B9326D7C3C8A8B02178E59AF506666542AB
 
 ## Customisation
 
-> I wan to custom the Oracle !
+> I wan to customize the Oracle !
 
 Example with sockets https://gist.github.com/mpgn/fce3c3f2aaa2eeb8fac5
 
