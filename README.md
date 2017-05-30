@@ -63,7 +63,7 @@ This is a wrong padding, so we can deduce the byte Y is wrong.
 * The oracle didn't give us a padding error and we know the byte X is good :
 
 ```
-If P'i ⊕ 0000000X == abcdefg0 then:
+If Pi ⊕ 0000000X == abcdefg0 then:
     abcdefg0 ⊕ 00000001 = abcdefg1
 ```
 
@@ -83,7 +83,7 @@ D<sub>k</sub>(C<sub>i</sub>) ⊕ C'<sub>i-1</sub> <br>
 * The oracle didn't give us a padding error and we know the byte X is good :
 
 ```
-If P'i ⊕ 000000YX == abcdef00 then:
+If Pi ⊕ 000000YX == abcdef00 then:
     abcdef00 ⊕ 00000022 = abcdef22
 ```
 
