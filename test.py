@@ -13,9 +13,9 @@ import binascii
 import sys
 import time
 from binascii import unhexlify, hexlify
-from itertools import cycle, izip
-from Crypto.Cipher import AES
-from Crypto import Random
+from itertools import cycle
+from Cryptodome.Cipher import AES
+from Cryptodome import Random
 
 """
     AES-CBC
