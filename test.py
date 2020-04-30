@@ -92,15 +92,15 @@ def run(cipher,size_block):
     cipher_block = split_len(cipher, len_block)
 
     if len(cipher_block) == 1:
-        print "[-] Abort there is only one block, i can't influence the IV. Tried a longer message"
+        print("[-] Abort there is only one block, i can't influence the IV. Tried a longer message")
         sys.exit()
 
     #for each cipher_block
     for block in reversed(range(1,len(cipher_block))):
         if len(cipher_block[block]) != len_block:
-            print "[-] Abort length block doesn't match the size_block"
+            print("[-] Abort length block doesn't match the size_block")
             break
-        print "[+] Search value block : ", block, "\n"
+        print("[+] Search value block : ", block, "\n")
         #for each byte of the block
         for i in range(0,size_block):
             # test each byte max 255
@@ -138,19 +138,19 @@ def run(cipher,size_block):
                         valide_value.insert(0,value[size_block-(i+1)])
 
                         if args.verbose == True:
-                            print ''
-                            print "[+] Block M_Byte : %s"% bk
-                            print "[+] Block C_{i-1}: %s"% bp
-                            print "[+] Block Padding: %s"% bc
-                            print ''
+                            print('')
+                            print("[+] Block M_Byte : %s"% bk)
+                            print("[+] Block C_{i-1}: %s"% bp)
+                            print("[+] Block Padding: %s"% bc)
+                            print('')
 
                         bytes_found = ''.join(valide_value)
                         if i == 0 and bytes_found.decode("hex") > hex(size_block) and block == len(cipher_block)-1:
-                            print "[-] Error decryption failed the padding is > "+str(size_block)
+                            print("[-] Error decryption failed the padding is > "+str(size_block))
                             sys.exit()
 
-                        print '\033[36m' + '\033[1m' + "[+]" + '\033[0m' + " Found", i+1,  "bytes :", bytes_found
-                        print ''
+                        print('\033[36m' + '\033[1m' + "[+]" + '\033[0m' + " Found", i+1,  "bytes :", bytes_found)
+                        print('')
 
                         break
             if found == False:
@@ -159,32 +159,32 @@ def run(cipher,size_block):
                     value = re.findall('..',bk)
                     valide_value.insert(0,"01")
                     if args.verbose == True:
-                        print ''
-                        print '[-] No padding found, but maybe the padding is length 01 :)'
-                        print "[+] Block M_Byte : %s"% bk
-                        print "[+] Block C_{i-1}: %s"% bp
-                        print "[+] Block Padding: %s"% bc
-                        print ''
+                        print('')
+                        print('[-] No padding found, but maybe the padding is length 01 :)')
+                        print("[+] Block M_Byte : %s"% bk)
+                        print("[+] Block C_{i-1}: %s"% bp)
+                        print("[+] Block Padding: %s"% bc)
+                        print('')
                         bytes_found = ''.join(valide_value)
                 else:
-                    print "\n[-] Error decryption failed"
+                    print("\n[-] Error decryption failed")
                     result.insert(0, ''.join(valide_value))
                     hex_r = ''.join(result)
                     if len(hex_r) > 0:
-                        print "[+] Partial Decrypted value (HEX):", hex_r.upper()
+                        print("[+] Partial Decrypted value (HEX):", hex_r.upper())
                         padding = int(hex_r[len(hex_r)-2:len(hex_r)],16)
-                        print "[+] Partial Decrypted value (ASCII):", hex_r[0:-(padding*2)].decode("hex")
+                        print("[+] Partial Decrypted value (ASCII):", hex_r[0:-(padding*2)].decode("hex"))
                     sys.exit()
             found = False
 
         result.insert(0, ''.join(valide_value))
         valide_value = []
 
-    print ''
+    print('')
     hex_r = ''.join(result)
-    print "[+] Decrypted value (HEX):", hex_r.upper()
+    print("[+] Decrypted value (HEX):", hex_r.upper())
     padding = int(hex_r[len(hex_r)-2:len(hex_r)],16)
-    print "[+] Decrypted value (ASCII):", hex_r[0:-(padding*2)].decode("hex")
+    print("[+] Decrypted value (ASCII):", hex_r[0:-(padding*2)].decode("hex"))
 
     return hex_r[0:-(padding*2)].decode("hex")
 
@@ -195,10 +195,10 @@ if __name__ == '__main__':
     parser.add_argument('-v', "--verbose",  help='debug mode, you need a large screen', action="store_true")
     args = parser.parse_args()
 
-    print "[+] Encrypt", args.message
+    print("[+] Encrypt", args.message)
     cipher, iv = encrypt(args.message, "1234567812345678")
     cipher_intercepted = cipher.encode("hex")
-    print "[+] %s ---> %s" % (args.message,  cipher_intercepted)
+    print("[+] %s ---> %s" % (args.message,  cipher_intercepted))
     plaintext = decrypt(cipher, iv)
 
     run(cipher_intercepted,16)
