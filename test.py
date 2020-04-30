@@ -23,11 +23,13 @@ from Cryptodome import Random
 """
 
 def pad(s):
-    return s + (16 - len(s) % 16) * chr(16 - len(s) % 16)
+    pad_byte = 16 - len(s) % 16
+    for i in range(pad_byte):
+        s.append(pad_byte)
+    return s
 
 def unpad(s):
-    t = s.encode("hex")
-    exe = re.findall('..',t)
+    exe = re.findall('..',s.hex())
     padding = int(exe[-1], 16)
     exe = exe[::-1]
 
@@ -41,12 +43,11 @@ def unpad(s):
 
 def encrypt( msg, iv):
     raw = pad(msg)
-    key = Random.new().read( AES.block_size )
-    cipher = AES.new('V38lKILOJmtpQMHp', AES.MODE_CBC, iv )
+    cipher = AES.new(b'V38lKILOJmtpQMHp', AES.MODE_CBC, iv )
     return cipher.encrypt( raw ), iv
 
 def decrypt( enc, iv ):
-    decipher = AES.new('V38lKILOJmtpQMHp', AES.MODE_CBC, iv )
+    decipher = AES.new(b'V38lKILOJmtpQMHp', AES.MODE_CBC, iv )
     return unpad(decipher.decrypt( enc ))
 
 
@@ -59,7 +60,7 @@ def test_validity(error):
 
 
 def call_oracle(up_cipher, iv):
-    if decrypt( up_cipher, iv ) == 0:
+    if decrypt( bytes.fromhex(up_cipher), iv ) == 0:
         return 404
     return 200
 
@@ -80,8 +81,11 @@ def block_padding(size_block, i):
 def split_len(seq, length):
     return [seq[i:i+length] for i in range(0, len(seq), length)]
 
-def hex_xor(s1,s2):
-    return hexlify(''.join(chr(ord(c1) ^ ord(c2)) for c1, c2 in zip(unhexlify(s1), cycle(unhexlify(s2)))))
+def hex_xor(s1, s2):
+    b = bytearray()
+    for c1, c2 in zip(bytes.fromhex(s1), cycle(bytes.fromhex(s2))):
+        b.append(c1 ^ c2)
+    return b.hex()
 
 def run(cipher,size_block):
     cipher       = cipher.upper()
@@ -118,7 +122,7 @@ def run(cipher,size_block):
                     #time.sleep(0.5)
 
                     # we call the oracle, our god
-                    error = call_oracle(up_cipher.decode('hex'),iv)
+                    error = call_oracle(up_cipher,iv)
 
                     if args.verbose == True:
                         exe = re.findall('..',cb)
@@ -145,7 +149,7 @@ def run(cipher,size_block):
                             print('')
 
                         bytes_found = ''.join(valide_value)
-                        if i == 0 and bytes_found.decode("hex") > hex(size_block) and block == len(cipher_block)-1:
+                        if i == 0 and int(bytes_found, 16) > size_block and block == len(cipher_block)-1:
                             print("[-] Error decryption failed the padding is > "+str(size_block))
                             sys.exit()
 
@@ -173,7 +177,7 @@ def run(cipher,size_block):
                     if len(hex_r) > 0:
                         print("[+] Partial Decrypted value (HEX):", hex_r.upper())
                         padding = int(hex_r[len(hex_r)-2:len(hex_r)],16)
-                        print("[+] Partial Decrypted value (ASCII):", hex_r[0:-(padding*2)].decode("hex"))
+                        print("[+] Partial Decrypted value (ASCII):", bytes.fromhex(hex_r[0:-(padding*2)]).decode())
                     sys.exit()
             found = False
 
@@ -184,9 +188,10 @@ def run(cipher,size_block):
     hex_r = ''.join(result)
     print("[+] Decrypted value (HEX):", hex_r.upper())
     padding = int(hex_r[len(hex_r)-2:len(hex_r)],16)
-    print("[+] Decrypted value (ASCII):", hex_r[0:-(padding*2)].decode("hex"))
+    decoded = bytes.fromhex(hex_r[0:-(padding*2)]).decode()
+    print("[+] Decrypted value (ASCII):", decoded)
 
-    return hex_r[0:-(padding*2)].decode("hex")
+    return decoded
 
 if __name__ == '__main__':                           
 
@@ -196,9 +201,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     print("[+] Encrypt", args.message)
-    cipher, iv = encrypt(args.message, "1234567812345678")
-    cipher_intercepted = cipher.encode("hex")
-    print("[+] %s ---> %s" % (args.message,  cipher_intercepted))
+    cipher, iv = encrypt(bytearray(args.message, 'UTF-8'), b"1234567812345678")
+    print("[+] %s ---> %s" % (args.message,  cipher.hex()))
     plaintext = decrypt(cipher, iv)
 
-    run(cipher_intercepted,16)
+    run(cipher.hex(), 16)
