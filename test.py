@@ -52,7 +52,7 @@ def decrypt(enc, iv):
     return unpad(decipher.decrypt(enc))
 
 
-""" the function you want change to adapte the result to your problem """
+""" The function you want change to adapt the result to your problem """
 
 
 def test_validity(error):
@@ -67,7 +67,7 @@ def call_oracle(up_cipher, iv):
     return 200
 
 
-""" create custom block for the byte we search"""
+""" Create custom block for the byte we search"""
 
 
 def block_search_byte(size_block, i, pos, l):
@@ -80,7 +80,7 @@ def block_search_byte(size_block, i, pos, l):
     )
 
 
-""" create custom block for the padding"""
+""" Create custom block for the padding"""
 
 
 def block_padding(size_block, i):
@@ -93,8 +93,6 @@ def block_padding(size_block, i):
     return "00" * (size_block - (i + 1)) + "".join(l)
 
 
-# the exploit don't need to touch this part
-# split the cipher in len of size_block
 def split_len(seq, length):
     return [seq[i : i + length] for i in range(0, len(seq), length)]
 
@@ -116,7 +114,7 @@ def run(cipher, size_block):
 
     if len(cipher_block) == 1:
         print(
-            "[-] Abort there is only one block, i can't influence the IV. Tried a longer message"
+            "[-] Abort there is only one block. I can't influence the IV. Try a longer message."
         )
         sys.exit()
 

@@ -1,8 +1,8 @@
 # Padding Oracle Attack
 
 An exploit for the [Padding Oracle Attack](https://en.wikipedia.org/wiki/Padding_oracle_attack). Tested against ASP.NET, works like a charm. The CBC  mode must use [PKCS7](https://en.wikipedia.org/wiki/Padding_%28cryptography%29#PKCS7) for the padding block.
-This is an implementation of this great article [Padding Oracle Attack](https://not.burntout.org/blog/Padding_Oracle_Attack/). Since the article is not very well formated and maybe unclear, I made an explanation in the readme. i advise you to read it if you want to understand the basics of the attack.
-This exploit allow block size of 8 or 16 this mean it can be use even if the cipher use AES or DES. You can find instructions to launch the attack [here](https://github.com/mpgn/Padding-Oracle-Attack#options).
+This is an implementation of this great article [Padding Oracle Attack](https://not.burntout.org/blog/Padding_Oracle_Attack/). Since the article is not very well formated and maybe unclear, I made an explanation in the readme. I advise you to read it if you want to understand the basics of the attack.
+This exploit allows block sizees of 8 or 16. This means it can be used if the cipher uses AES or DES. You can find instructions to launch the attack [here](https://github.com/mpgn/Padding-Oracle-Attack#options).
 
 I also made a test file `test.py`, you don't need a target to use it :)
 
@@ -116,14 +116,14 @@ Details required options:
 -l length of a block example: 8 or 16
 -u UrlTarget for example: ?/page=
 --host hostname example: google.fr
---error Error that the orcale give you for a wrong padding
+--error Error that the oracle gives you for a wrong padding
     example: with HTTP method: 200,400,500
              with DOM HTML   : "<h2>Padding Error</h2>"
 ```
 Optional options:
 ```bash
 --cookie Cookie parameter example: PHPSESSID=9nnvje7p90b507shfmb94d7
---method Default GET methode but can se POST etc
+--method Default GET method but can set POST etc
 --post POST parameter if you need example 'user':'value', 'pass':'value'
 ```
 
@@ -144,10 +144,10 @@ No problem, find these line and do what you have to do :)
 
 * Custom oracle response: 
 ```python
-####################################
-# CUSTOM YOUR RESPONSE ORACLE HERE #
-####################################
-''' the function you want change to adapte the result to your problem '''
+#######################################
+# CUSTOMIZE YOUR RESPONSE ORACLE HERE #
+#######################################
+''' The function you want change to adapt the result to your problem '''
 def test_validity(response,error):
     try:
         value = int(error)
@@ -165,9 +165,9 @@ def test_validity(response,error):
 
 * Custom oracle call (HTTP)
 ```python
-################################
-# CUSTOM YOUR ORACLE HTTP HERE #
-################################
+###################################
+# CUSTOMIZE YOUR ORACLE HTTP HERE #
+###################################
 def call_oracle(host,cookie,url,post,method,up_cipher):
     if post:
         params = urllib.urlencode({post})
