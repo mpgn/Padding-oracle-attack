@@ -2,7 +2,7 @@
 
 An exploit for the [Padding Oracle Attack](https://en.wikipedia.org/wiki/Padding_oracle_attack). Tested against ASP.NET, works like a charm. The CBC  mode must use [PKCS7](https://en.wikipedia.org/wiki/Padding_%28cryptography%29#PKCS7) for the padding block.
 This is an implementation of this great article [Padding Oracle Attack](https://not.burntout.org/blog/Padding_Oracle_Attack/). Since the article is not very well formated and maybe unclear, I made an explanation in the readme. I advise you to read it if you want to understand the basics of the attack.
-This exploit allows block sizees of 8 or 16. This means it can be used if the cipher uses AES or DES. You can find instructions to launch the attack [here](https://github.com/mpgn/Padding-Oracle-Attack#options).
+This exploit allows block sizes of 8 or 16. This means it can be used if the cipher uses AES or DES. You can find instructions to launch the attack [here](https://github.com/mpgn/Padding-Oracle-Attack#options).
 
 I also made a test file `test.py`, you don't need a target to use it :)
 
